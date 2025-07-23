@@ -30,25 +30,33 @@ def show_available_backends():
         for backend_name in sorted(backends.keys()):
             print(f"  - {backend_name}")
 
-def propose_backends(num_qubits: int):
+def propose_backends(num_qubits: int, print_info: bool = True):
     """Proposes a suitable backend based on the number of qubits."""
     if num_qubits in _BACKENDS:
-        print(f"✅ Found emulators with exactly {num_qubits} qubits:")
-        for backend_name in _BACKENDS[num_qubits]:
-            print(f"  - {backend_name}")
-        return
+        if print_info:
+            print(f"✅ Found emulators with exactly {num_qubits} qubits:")
+            for backend_name in _BACKENDS[num_qubits]:
+                print(f"  - {backend_name}")
+        return _BACKENDS[num_qubits]
 
     larger_backends_qubits = sorted([q for q in _BACKENDS if q > num_qubits])
     
     if not larger_backends_qubits:
-        print(f"❌ No emulator available with {num_qubits} qubits or more.")
-        return
-
-    print(f"ℹ️ No emulator with exactly {num_qubits} qubits. Proposing larger alternatives:")
+        if print_info:
+            print(f"❌ No emulator available with {num_qubits} qubits or more.")
+        else:
+            raise ValueError(f"No emulator available with {num_qubits} qubits or more.")
+    
+    list_available_backends = []
+    if print_info:
+        print(f"ℹ️ No emulator with exactly {num_qubits} qubits. Proposing larger alternatives:")
     for available_qubits in larger_backends_qubits:
-        print(f"Qubits: {available_qubits}")
-        for backend_name in _BACKENDS[available_qubits]:
-            print(f"  - {backend_name}")
+        if print_info:
+            print(f"Qubits: {available_qubits}")
+            for backend_name in _BACKENDS[available_qubits]:
+                print(f"  - {backend_name}")
+        list_available_backends += _BACKENDS[available_qubits]
+    return list_available_backends
             
 def get_backend_by_name(backend_name: str):
     """Gets a backend instance by its name."""
